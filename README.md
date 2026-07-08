@@ -1,2 +1,2 @@
-# course-sdd
-Capacitación: AI-SSD DE EC PARA FSSSRL
+# Curso de SDD
+Capacitación: AI-SSD DE Entrenamiento Certero PARA ForeSight Solutions, Sociedad de Responsabilidad Limitada
