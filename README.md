@@ -1,10 +1,9 @@
-# Curso de SDD
+﻿# Curso de SDD
+ ## Readme.md
+ Archivo READme que contiene datos del proyecto
 
 <!-- local-development:start -->
-## Desarrollo local
+## Desarrollo de este fork
 
-Consulta [RUNNING.md](RUNNING.md) para ubicar cada componente, abrirlo en su IDE, compilarlo y conocer las comprobaciones realizadas y los requisitos pendientes.
+Este repositorio personal integra el historial de [ememc/course-sdd, rama main](https://github.com/ememc/course-sdd). Consulta [RUNNING.md](RUNNING.md) para abrirlo en tu entorno, compilarlo o validar sus datos y conocer sus requisitos y límites. Se conservan la documentación, las licencias y las atribuciones del original.
 <!-- local-development:end -->
-
-Capacitación: AI-SSD DE Entrenamiento Certero PARA ForeSight Solutions, Sociedad de Responsabilidad Limitada
-	## ReadMe.md
