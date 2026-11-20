@@ -49,3 +49,11 @@ Con el backend activo en modo Development y la base de práctica inicializada, e
 Se verifican la compilación de los cuatro proyectos .NET, la compilación del frontend, Swagger, el inicio de sesión y una consulta autenticada en una base LocalDB aislada. El lint conserva advertencias del material de clase; compilar y estas pruebas no certifican todos los flujos de negocio.
 
 `origin` es tu repositorio personal. `upstream` contiene el material del profesor y tiene push deshabilitado localmente. Para seguir nuevas clases, descarga e integra `upstream/main` en una rama de trabajo y conserva tus ejercicios. El repositorio no contiene necesariamente los vídeos; usa los enlaces que te facilite el profesor.
+
+<!-- improvements-20261119:start -->
+## Mejoras y verificación — 2026-11-19 (Mejoras de accesibilidad y manejo de teclado en Login y Header React)
+
+- En `Login.tsx`: añadido botón accesible para mostrar/ocultar contraseña, alerta `role="alert" aria-live="polite"`, atributos `autoComplete` y limpieza de espacios en el correo.
+- En `Header.tsx`: añadido cierre con tecla `Escape`, atributos ARIA (`aria-expanded`, `aria-haspopup`, `role="menu"`) y navegación resiliente ante fallos transitorios al marcar notificaciones.
+- Validación: `npm run build` (`tsc -b && vite build`) y `npm run lint` (`oxlint`) en `frontend/` aprobados sin errores.
+<!-- improvements-20261119:end -->

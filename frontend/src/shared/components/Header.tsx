@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../../features/auth/AuthContext';
@@ -22,18 +21,25 @@ export const Header: React.FC = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdown on click outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setDropdownOpen(false);
       }
     };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setDropdownOpen(false);
+      }
+    };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
   }, []);
 
-  // Fetch unread notifications with 30s polling
   const { data: notifications = [] } = useQuery<Notificacion[]>({
     queryKey: ['notifications'],
     queryFn: async () => {
@@ -45,7 +51,6 @@ export const Header: React.FC = () => {
     enabled: !!user,
   });
 
-  // Mark all as read mutation
   const markAllReadMutation = useMutation({
     mutationFn: async () => {
       await apiClient.post('/notificaciones/read-all');
@@ -55,7 +60,6 @@ export const Header: React.FC = () => {
     },
   });
 
-  // Mark single as read mutation
   const markReadMutation = useMutation({
     mutationFn: async (id: string) => {
       await apiClient.post(`/notificaciones/${id}/read`);
@@ -67,7 +71,11 @@ export const Header: React.FC = () => {
 
   const handleNotificationClick = async (notif: Notificacion) => {
     setDropdownOpen(false);
-    await markReadMutation.mutateAsync(notif.id);
+    try {
+      await markReadMutation.mutateAsync(notif.id);
+    } catch {
+      // Navigate even if mark-as-read transiently fails.
+    }
     if (notif.solicitudId) {
       navigate(`/solicitudes/${notif.solicitudId}`);
     }
@@ -86,17 +94,17 @@ export const Header: React.FC = () => {
         <h2>Solicitudes SDD</h2>
       </div>
 
-      <nav className="nav-links">
+      <nav className="nav-links" aria-label="Navegación principal">
         {user.rol === 'Empleado' && (
           <>
-            <Link 
-              to="/" 
+            <Link
+              to="/"
               className={`nav-link ${location.pathname === '/' || location.pathname.startsWith('/editar') ? 'active' : ''}`}
             >
               Mis Solicitudes
             </Link>
-            <Link 
-              to="/nueva" 
+            <Link
+              to="/nueva"
               className={`nav-link ${location.pathname === '/nueva' ? 'active' : ''}`}
             >
               Nueva Solicitud
@@ -105,8 +113,8 @@ export const Header: React.FC = () => {
         )}
 
         {user.rol === 'Supervisor' && (
-          <Link 
-            to="/" 
+          <Link
+            to="/"
             className={`nav-link ${location.pathname === '/' || location.pathname.startsWith('/solicitudes') ? 'active' : ''}`}
           >
             Panel de Supervisor
@@ -115,20 +123,20 @@ export const Header: React.FC = () => {
 
         {user.rol === 'Administrador' && (
           <>
-            <Link 
-              to="/" 
+            <Link
+              to="/"
               className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}
             >
               Ver Solicitudes
             </Link>
-            <Link 
-              to="/admin/tipos-solicitud" 
+            <Link
+              to="/admin/tipos-solicitud"
               className={`nav-link ${location.pathname.startsWith('/admin/tipos-solicitud') ? 'active' : ''}`}
             >
               Tipos de Solicitud
             </Link>
-            <Link 
-              to="/admin/usuarios" 
+            <Link
+              to="/admin/usuarios"
               className={`nav-link ${location.pathname.startsWith('/admin/usuarios') ? 'active' : ''}`}
             >
               Usuarios y Reasignaciones
@@ -142,22 +150,29 @@ export const Header: React.FC = () => {
           {user.nombre} ({user.rol})
         </span>
 
-        {/* Notifications dropdown (Admin doesn't get notifications in v1) */}
         {user.rol !== 'Administrador' && (
           <div className="notification-bell-container" ref={dropdownRef}>
-            <button className="bell-button" onClick={() => setDropdownOpen(!dropdownOpen)}>
+            <button
+              type="button"
+              className="bell-button"
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+              aria-label={`Notificaciones (${notifications.length} sin leer)`}
+              aria-expanded={dropdownOpen}
+              aria-haspopup="menu"
+            >
               🔔
               {notifications.length > 0 && (
-                <span className="bell-badge">{notifications.length}</span>
+                <span className="bell-badge" aria-hidden="true">{notifications.length}</span>
               )}
             </button>
 
             {dropdownOpen && (
-              <div className="notifications-dropdown">
+              <div className="notifications-dropdown" role="menu" aria-label="Lista de notificaciones">
                 <div className="notifications-header">
                   <h4>Notificaciones ({notifications.length})</h4>
                   {notifications.length > 0 && (
-                    <button 
+                    <button
+                      type="button"
                       className="clear-all-btn"
                       onClick={() => markAllReadMutation.mutate()}
                     >
@@ -170,16 +185,19 @@ export const Header: React.FC = () => {
                     <div className="empty-notifications">No tienes notificaciones pendientes</div>
                   ) : (
                     notifications.map((notif) => (
-                      <div 
-                        key={notif.id} 
+                      <button
+                        type="button"
+                        key={notif.id}
+                        role="menuitem"
                         className="notification-item unread"
                         onClick={() => handleNotificationClick(notif)}
+                        style={{ width: '100%', textAlign: 'left', border: 'none', background: 'transparent', cursor: 'pointer' }}
                       >
                         <div>{notif.mensaje}</div>
                         <span className="notification-time">
                           {new Date(notif.fechaCreacion).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
-                      </div>
+                      </button>
                     ))
                   )}
                 </div>
@@ -188,7 +206,7 @@ export const Header: React.FC = () => {
           </div>
         )}
 
-        <button className="logout-button" onClick={handleLogout}>
+        <button type="button" className="logout-button" onClick={handleLogout}>
           Cerrar Sesión
         </button>
       </div>
